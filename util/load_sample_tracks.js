@@ -10,6 +10,9 @@ const rapIds = artistIds.rap;
 const Redis = require('ioredis');
 const rc = new Redis();
 const rockIds = artistIds.rock;
+const jazzIds = artistIds.jazz;
+const funkIds = artistIds.funk;
+const progIds = artistIds.prog;
 let rooms = require('../config').rooms;
 let score;
 let skip = 0; // Skip counter
@@ -21,7 +24,7 @@ const options = {
   // Look up multiple artists by their IDs and get `limit` songs for each one
   path:
     '/lookup?id=' +
-    popIds.concat(rapIds, rockIds).join() +
+    popIds.concat(rapIds, rockIds, jazzIds, funkIds, progIds).join() +
     '&entity=song&limit=' +
     limit,
   port: 80
@@ -41,6 +44,15 @@ const updateRooms = function(artistId) {
   } else if (artistId === rapIds[0]) {
     rooms.push('rap');
     skip = rapIds.length - 1;
+  }  else if (artistId === jazzIds[0]) {
+    rooms.push('jazz');
+    skip = jazzIds.length - 1;
+  }  else if (artistId === funkIds[0]) {
+    rooms.push('funk');
+    skip = funkIds.length - 1;
+  }  else if (artistId === progIds[0]) {
+    rooms.push('prog');
+    skip = progIds.length - 1;
   } else {
     rooms.push('oldies', 'rock');
     skip = rockIds.length - 1;

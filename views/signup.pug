@@ -26,6 +26,7 @@ block sections
           li You will be the one and only owner of your nickname (no one can use 
             | your nickname in your place).
           li Some simple stats related to your account will be collected.
+          li You can get those sweet succulent sats for correct answers.
         - if (locals.errors && errors.alert)
           .alert.alert-error
             a.close(data-dismiss="alert") &times;
@@ -36,42 +37,30 @@ block sections
             - if (locals.errors)
               - if (errors.username)
                 .control-group.error
-                  label.control-label(for="username") Name
+                  label.control-label(for="username") Nym
                   .controls
                     input#username(type="text", name="username",
                       maxlength="15", value=oldvalues.username)
                     span.help-inline #{errors.username}
               - else
                 .control-group
-                  label.control-label(for="username") Name
+                  label.control-label(for="username") Nym
                   .controls
                     input#username(type="text", name="username",
                       maxlength="15", value=oldvalues.username)
-              - if (errors.email)
+              - if (errors.lightning)
                 .control-group.error
-                  label.control-label(for="email") Email
+                  label.control-label(for="lightning") Lightning
                   .controls
-                    input#email(type="text", name="email",
-                      value=oldvalues.email)
-                    span.help-inline #{errors.email}
+                    input#email(type="text", name="lightning",
+                      value=window.webln.getBalance())
+                    span.help-inline #{errors.lightning}
               - else
                 .control-group
-                  label.control-label(for="email") Email
+                  label.control-label(for="lightning") Lightning
                   .controls
-                    input#email(type="text", name="email",
-                      value=oldvalues.email)
-              - if (errors.password)
-                .control-group.error
-                  label.control-label(for="password") Password
-                  .controls
-                    input#password(type="password", name="password")
-                    span.help-inline #{errors.password}
-              - else
-                .control-group
-                  label.control-label(for="password") Password
-                  .controls
-                    input#password(type="password", name="password",
-                      placeholder="enter a password...")
+                    input#email(type="text", name="lightning",
+                      value=window.webln.getBalance())
               - if (errors.captcha)
                 .control-group.error
                   label.control-label(for="captcha-input") Are you human?
@@ -94,10 +83,10 @@ block sections
                   input#username(type="text", name="username",
                     maxlength="15", placeholder="enter a nickname...")
               .control-group
-                label.control-label(for="email") Email
+                label.control-label(for="lightning") Lightning
                 .controls
-                  input#email(type="text", name="email",
-                    placeholder="enter a valid email...")
+                  input#email(type="text", name="lightning",
+                    placeholder="enter a valid lightning address...")
               .control-group
                 label.control-label(for="password") Password
                 .controls

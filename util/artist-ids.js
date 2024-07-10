@@ -23,6 +23,33 @@ module.exports = {
     13503763, // Swollen Members
     43680 // The Roots
   ],
+  jazz: [
+    160853844, // JD Allen
+    120199, // Coltrane
+    44706, // Larry Young
+    56268, // Dizzy Gillespie
+    30703, // Freddie Hubbard
+    72348, // Keith Jarrett
+    154076564 // Kamasi Washington
+  ],
+  funk: [
+    79749, // The Gap Band
+    79943, // Parliament
+    133901, // Ohio Players
+    567602, // Zapp
+    204432, // Slave
+    32181103, // Funkadelic
+    17402 // Chaka Khan
+  ],
+  prog: [
+    460828, // Kansas
+    154011, // Yes
+    50526, // Rush
+    44596725, // Jethro Tull
+    27358441, // Emerson, Lake, and Palmer
+    627204, // King Crimson
+    27054064 // Focus
+  ],
   rock: [
     5040714, // AC/DC
     462006, // Bob Dylan
