@@ -11,6 +11,17 @@ block nav
       a(target="_blank", href="/leaderboards")
         i.icon-list-alt.icon-white
         |  Leaderboards
+    li.active.dropdown
+      a.dropdown-toggle(data-toggle="dropdown", href="#") #{roomname} 
+        b.caret
+      ul.dropdown-menu
+        each room in rooms
+          - if (room !== roomname)
+            li
+              a(href=room)
+                span.room-name #{room}
+                i.icon-user.pull-right
+                span.users-counter
     - if (locals.loggedin)
       li.dropdown
         a.dropdown-toggle(data-toggle="dropdown", href="#") Logged in as #{loggedin} 
@@ -28,8 +39,6 @@ block nav
       li
         a(href="/login") Login
           li.active
-      li
-        a(href="/lightning") Lightning
 
 block sections
   section
