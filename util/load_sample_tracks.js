@@ -1,10 +1,6 @@
-'use strict';
-
 const artistIds = require('./artist-ids');
-const http = require('http');
-const JSONStream = require('JSONStream');
+const axios = require('axios');
 const limit = 7; // The number of songs to retrieve for each artist
-const parser = JSONStream.parse(['results', true]);
 const popIds = artistIds.pop;
 const rapIds = artistIds.rap;
 const Redis = require('ioredis');
@@ -19,15 +15,12 @@ let skip = 0; // Skip counter
 let songId = 0;
 
 const options = {
-  headers: { 'content-type': 'application/json' },
-  host: 'itunes.apple.com',
-  // Look up multiple artists by their IDs and get `limit` songs for each one
-  path:
-    '/lookup?id=' +
-    popIds.concat(rapIds, rockIds, jazzIds, funkIds, progIds).join() +
-    '&entity=song&limit=' +
-    limit,
-  port: 80
+  url: 'https://itunes.apple.com/lookup',
+  params: {
+    id: popIds.concat(rapIds, rockIds, jazzIds, funkIds, progIds).join(),
+    entity: 'song',
+    limit: limit
+  }
 };
 
 /**
@@ -59,52 +52,56 @@ const updateRooms = function(artistId) {
   }
 };
 
-parser.on('data', function(track) {
-  if (track.wrapperType === 'artist') {
-    if (skip) {
-      skip--;
-      return;
-    }
-    updateRooms(track.artistId);
-    return;
-  }
+axios.get(options.url, { params: options.params })
+  .then(response => {
+    const data = response.data;
+    const results = data.results;
+    results.forEach(result => {
+      if (result.wrapperType === 'artist') {
+        if (skip) {
+          skip--;
+          return;
+        }
+        updateRooms(result.artistId);
+        return;
+      }
 
-  rc.hmset(
-    'song:' + songId,
-    'artistName',
-    track.artistName,
-    'trackName',
-    track.trackName,
-    'trackViewUrl',
-    track.trackViewUrl,
-    'previewUrl',
-    track.previewUrl,
-    'artworkUrl60',
-    track.artworkUrl60,
-    'artworkUrl100',
-    track.artworkUrl100
-  );
+      rc.hmset(
+        'song:' + songId,
+        'artistName',
+        result.artistName,
+        'trackName',
+        result.trackName,
+        'trackViewUrl',
+        result.trackViewUrl,
+        'previewUrl',
+        result.previewUrl,
+        'artworkUrl60',
+        result.artworkUrl60,
+        'artworkUrl100',
+        result.artworkUrl100
+      );
 
-  rooms.forEach(function(room) {
-    const _score = room === 'mixed' ? songId : score;
-    rc.zadd(room, _score, songId);
+      rooms.forEach(room => {
+        const _score = room === 'mixed' ? songId : score;
+        rc.zadd(room, _score, songId);
+      });
+
+      score++;
+      songId++;
+    });
+  })
+  .catch(error => {
+    console.error(error);
+  })
+  .finally(() => {
+    rc.quit();
+    process.stdout.write('OK\n');
   });
-
-  score++;
-  songId++;
-});
-
-parser.on('end', function() {
-  rc.quit();
-  process.stdout.write('OK\n');
-});
 
 rc.del(rooms, function(err) {
   if (err) {
     throw err;
   }
   process.stdout.write('Loading sample tracks... ');
-  http.get(options, function(res) {
-    res.pipe(parser);
-  });
 });
