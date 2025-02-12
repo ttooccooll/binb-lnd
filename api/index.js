@@ -1,6 +1,6 @@
 import express from 'express';
-import bodyParser from 'body-parser';
 import { Redis } from '@upstash/redis';
+import bodyParser from 'body-parser';
 
 const app = express();
 app.use(bodyParser.json());
@@ -14,12 +14,15 @@ const redis = new Redis({
 app.post('/api/rooms', async (req, res) => {
   const { name } = req.body;
   const roomId = Date.now().toString();
+
   await redis.hset(`room:${roomId}`, {
     id: roomId,
     name,
     inProgress: false,
-    participants: '[]'
+    participants: '[]',
+    currentSong: null
   });
+
   res.json({ id: roomId, name });
 });
 
@@ -31,7 +34,6 @@ app.get('/api/rooms', async (req, res) => {
   res.json(roomData);
 });
 
-// Game state management
 app.post('/api/rooms/:roomId/join', async (req, res) => {
   const { roomId } = req.params;
   const { userId, username } = req.body;
@@ -42,12 +44,15 @@ app.post('/api/rooms/:roomId/join', async (req, res) => {
   }
   
   const participants = JSON.parse(room.participants || '[]');
-  participants.push({ userId, username, score: 0 });
-  
-  await redis.hset(`room:${roomId}`, {
-    ...room,
-    participants: JSON.stringify(participants)
-  });
+
+  if (!participants.find(p => p.userId === userId)) {
+    participants.push({ userId, username, score: 0 });
+    await redis.hset(`room:${roomId}`, {
+      ...room,
+      participants: JSON.stringify(participants)
+    });
+  }
+
   
   res.json({ success: true });
 });
