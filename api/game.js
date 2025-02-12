@@ -14,33 +14,33 @@ export default async function handler(req) {
     return new Response('Method not allowed', { status: 405 });
   }
 
-  const data = await req.json();
-  const { roomId, type, guess } = data;
+  try {
+    const data = await req.json();
+    const { roomId, type, guess } = data;
 
-  if (type === 'guess') {
-    const room = await redis.hgetall(`room:${roomId}`);
-    if (!room) {
-      return new Response('Room not found', { status: 404 });
+    if (type === 'guess') {
+        const room = await redis.hgetall(`room:${roomId}`);
+        if (!room) {
+          return new Response('Room not found', { status: 404 });
+        }
+        // Simple string comparison for guessing
+        const currentSong = JSON.parse(room.currentSong || 'null');
+        const isCorrect = currentSong && 
+          (guess.toLowerCase() === currentSong.title.toLowerCase() ||
+           guess.toLowerCase() === currentSong.artist.toLowerCase());
+        // Publish the guess result
+        await redis.publish('game-events', JSON.stringify({
+          type: 'guess_result',
+          roomId,
+          correct: isCorrect,
+          guess
+        }));
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { 'Content-Type': 'application/json' }
+        });
     }
-
-    // Simple string comparison for guessing (you can enhance this logic)
-    const currentSong = JSON.parse(room.currentSong || 'null');
-    const isCorrect = currentSong && 
-      (guess.toLowerCase() === currentSong.title.toLowerCase() ||
-       guess.toLowerCase() === currentSong.artist.toLowerCase());
-
-    // Publish the guess result
-    await redis.publish('game-events', JSON.stringify({
-      type: 'guess_result',
-      roomId,
-      correct: isCorrect,
-      guess
-    }));
-
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-
-  return new Response('Invalid game action', { status: 400 });
+        return new Response('Invalid game action', { status: 400 });
+    } catch (error) {
+        return new Response('Internal Server Error', { status: 500 });
+    }
 }
