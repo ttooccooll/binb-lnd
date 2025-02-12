@@ -6,8 +6,11 @@
       "use": "@vercel/node"
     },
     {
-      "src": "public/**",
-      "use": "@vercel/static"
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist/public"
+      }
     }
   ],
   "routes": [
@@ -22,5 +25,11 @@
 
     },
     {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/pub
+      "dest": "/index.html"
+    }
+  ]
+}
