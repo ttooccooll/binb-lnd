@@ -3,33 +3,21 @@
   "builds": [
     {
       "src": "api/*.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node@3.0.0"
     },
     {
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist/public"
+        "distDir": "dist/public",
+        "nodeVersion": "18.x"
       }
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-
       "dest": "/api/$1"
     },
     {
-      "src": "/ws",
-      "dest": "/api/events.js"
-
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ]
-}
+ 

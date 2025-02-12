@@ -1,7 +1,7 @@
 import { Redis } from '@upstash/redis';
 
 export const config = {
-  runtime: 'edge',
+  runtime: 'edge'
 };
 
 const redis = new Redis({
@@ -14,7 +14,7 @@ export default async function handler(req) {
     'Content-Type': 'text/event-stream',
     'Connection': 'keep-alive',
     'Cache-Control': 'no-cache',
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': '*'
   };
 
   const stream = new ReadableStream({
@@ -26,14 +26,14 @@ export default async function handler(req) {
       // Initial connection
       sendEvent({ type: 'connected' });
 
-      // Setup Redis pub/sub for real-time updates
-      const subscription = redis.subscribe('game-events', (message) => {
-        sendEvent(JSON.parse(message));
-      });
+      // Keep the connection alive with a ping every 30 seconds
+      const interval = setInterval(() => {
+        sendEvent({ type: 'ping' });
+      }, 30000);
 
-      // Handle connection close
+      // Clean up on close
       req.signal.addEventListener('abort', () => {
-        subscription.unsubscribe();
+        clearInterval(interval);
       });
     }
   });
