@@ -20,4 +20,15 @@
       "dest": "/api/$1"
     },
     {
- 
+      "src": "/ws",
+      "dest": "/api/events.js"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
